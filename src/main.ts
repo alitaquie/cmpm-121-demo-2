@@ -13,11 +13,11 @@ canvas.width = 256;
 canvas.height = 256;
 canvas.id = "appCanvas";
 
-// Create a clear button
+
 const clearButton = document.createElement("button");
 clearButton.textContent = "Clear Canvas";
 
-// Append elements to the app
+
 app.appendChild(titleElement);
 app.appendChild(canvas);
 app.appendChild(clearButton);
@@ -27,16 +27,34 @@ const ctx = canvas.getContext("2d");
 let isDrawing = false;
 
 
+const lines: Array<Array<{ x: number; y: number }>> = [];
+
+function redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    lines.forEach((line) => {
+        ctx.beginPath();
+        ctx.moveTo(line[0].x, line[0].y); 
+        line.forEach((point) => {
+            ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke(); 
+    });
+}
+
+
 canvas.addEventListener("mousedown", (event) => {
     isDrawing = true;
-    ctx.beginPath(); 
-    ctx.moveTo(event.offsetX, event.offsetY); 
+    lines.push([]); 
+    const point = { x: event.offsetX, y: event.offsetY };
+    lines[lines.length - 1].push(point); 
+    canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 canvas.addEventListener("mousemove", (event) => {
     if (!isDrawing) return;
-    ctx.lineTo(event.offsetX, event.offsetY); 
-    ctx.stroke(); 
+    const point = { x: event.offsetX, y: event.offsetY };
+    lines[lines.length - 1].push(point); 
+    canvas.dispatchEvent(new Event("drawing-changed")); 
 });
 
 
@@ -44,11 +62,15 @@ canvas.addEventListener("mouseup", () => {
     isDrawing = false;
 });
 
-
 clearButton.addEventListener("click", () => {
+    lines.length = 0; // Clear all lines
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
 });
 
+
+canvas.addEventListener("drawing-changed", () => {
+    redraw(); // Redraw the lines whenever the drawing changes
+});
 
 canvas.addEventListener("mouseleave", () => {
     isDrawing = false;
