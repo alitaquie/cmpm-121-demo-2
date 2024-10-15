@@ -28,68 +28,84 @@ app.appendChild(clearButton);
 
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
-const lines: Array<Array<{ x: number; y: number }>> = [];
-const redoStack: Array<Array<{ x: number; y: number }>> = [];
+
+const lines: MarkerLine[] = [];
+const redoStack: MarkerLine[] = [];
+
+class MarkerLine {
+    private points: { x: number; y: number }[];
+
+    constructor(initialPoint: { x: number; y: number }) {
+        this.points = [initialPoint];
+    }
+
+    drag(x: number, y: number) {
+        this.points.push({ x, y });
+    }
+
+    display(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.moveTo(this.points[0].x, this.points[0].y);
+        this.points.forEach(point => {
+            ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke();
+    }
+}
 
 function redraw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
-    lines.forEach((line) => {
-        ctx.beginPath();
-        ctx.moveTo(line[0].x, line[0].y); 
-        line.forEach((point) => {
-            ctx.lineTo(point.x, point.y); 
-        });
-        ctx.stroke(); 
-    });
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    lines.forEach(line => line.display(ctx));
 }
 
 canvas.addEventListener("mousedown", (event) => {
     isDrawing = true;
-    redoStack.length = 0; 
-    lines.push([]); 
-    const point = { x: event.offsetX, y: event.offsetY };
-    lines[lines.length - 1].push(point); 
+    redoStack.length = 0;
+    const initialPoint = { x: event.offsetX, y: event.offsetY };
+    const newLine = new MarkerLine(initialPoint);
+    lines.push(newLine);
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 canvas.addEventListener("mousemove", (event) => {
     if (!isDrawing) return;
-    const point = { x: event.offsetX, y: event.offsetY };
-    lines[lines.length - 1].push(point); 
-    canvas.dispatchEvent(new Event("drawing-changed")); 
+    const currentLine = lines[lines.length - 1];
+    currentLine.drag(event.offsetX, event.offsetY);
+    canvas.dispatchEvent(new Event("drawing-changed"));
 });
+
 canvas.addEventListener("mouseup", () => {
     isDrawing = false;
 });
+
 clearButton.addEventListener("click", () => {
-    lines.length = 0; 
-    redoStack.length = 0; 
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    lines.length = 0;
+    redoStack.length = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
 undoButton.addEventListener("click", () => {
     if (lines.length > 0) {
-        const lastLine = lines.pop(); 
+        const lastLine = lines.pop();
         if (lastLine) {
             redoStack.push(lastLine);
         }
-        canvas.dispatchEvent(new Event("drawing-changed")); 
+        canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
 
-// Redo button click event
 redoButton.addEventListener("click", () => {
     if (redoStack.length > 0) {
-        const lastRedo = redoStack.pop(); 
+        const lastRedo = redoStack.pop();
         if (lastRedo) {
             lines.push(lastRedo);
         }
-        canvas.dispatchEvent(new Event("drawing-changed")); 
+        canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
 
 canvas.addEventListener("drawing-changed", () => {
-    redraw(); // Redraw the lines whenever the drawing changes
+    redraw();
 });
 
 canvas.addEventListener("mouseleave", () => {
