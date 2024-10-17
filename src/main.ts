@@ -42,6 +42,7 @@ let currentThickness = 1; // Default to thin marker
 
 const lines: MarkerLine[] = [];
 const redoStack: MarkerLine[] = [];
+let toolPreview: ToolPreview | null = null; // Nullable reference for tool preview
 
 // MarkerLine class that accepts thickness
 class MarkerLine {
@@ -68,9 +69,38 @@ class MarkerLine {
     }
 }
 
+// ToolPreview class to draw a circle indicating the current tool size
+class ToolPreview {
+    private x: number;
+    private y: number;
+    private thickness: number;
+
+    constructor(x: number, y: number, thickness: number) {
+        this.x = x;
+        this.y = y;
+        this.thickness = thickness;
+    }
+
+    updatePosition(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.thickness / 2, 0, 2 * Math.PI);
+        ctx.strokeStyle = "gray"; // Use gray for the preview
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+}
+
 function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     lines.forEach(line => line.display(ctx));
+    if (!isDrawing && toolPreview) {
+        toolPreview.draw(ctx); // Draw the tool preview if the mouse is not down
+    }
 }
 
 canvas.addEventListener("mousedown", (event) => {
@@ -79,18 +109,28 @@ canvas.addEventListener("mousedown", (event) => {
     const initialPoint = { x: event.offsetX, y: event.offsetY };
     const newLine = new MarkerLine(initialPoint, currentThickness);
     lines.push(newLine);
+    toolPreview = null; // Hide tool preview when drawing starts
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 canvas.addEventListener("mousemove", (event) => {
-    if (!isDrawing) return;
-    const currentLine = lines[lines.length - 1];
-    currentLine.drag(event.offsetX, event.offsetY);
-    canvas.dispatchEvent(new Event("drawing-changed"));
+    if (!isDrawing) {
+        if (!toolPreview) {
+            toolPreview = new ToolPreview(event.offsetX, event.offsetY, currentThickness);
+        } else {
+            toolPreview.updatePosition(event.offsetX, event.offsetY);
+        }
+        canvas.dispatchEvent(new Event("tool-moved"));
+    } else {
+        const currentLine = lines[lines.length - 1];
+        currentLine.drag(event.offsetX, event.offsetY);
+        canvas.dispatchEvent(new Event("drawing-changed"));
+    }
 });
 
 canvas.addEventListener("mouseup", () => {
     isDrawing = false;
+    canvas.dispatchEvent(new Event("tool-moved"));
 });
 
 clearButton.addEventListener("click", () => {
@@ -120,6 +160,10 @@ redoButton.addEventListener("click", () => {
 });
 
 canvas.addEventListener("drawing-changed", () => {
+    redraw();
+});
+
+canvas.addEventListener("tool-moved", () => {
     redraw();
 });
 
