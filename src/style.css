@@ -100,3 +100,7 @@ button:focus-visible {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Drop shadow */
   margin-top: 1rem;
 }
+
+button.selectedTool {
+  background-color: yellow; 
+}
