@@ -28,10 +28,21 @@ thinMarkerButton.textContent = "Thin Marker";
 const thickMarkerButton = document.createElement("button");
 thickMarkerButton.textContent = "Thick Marker";
 
+// Sticker buttons
+const sticker1Button = document.createElement("button");
+sticker1Button.textContent = "⚽";
+const sticker2Button = document.createElement("button");
+sticker2Button.textContent = "🚀";
+const sticker3Button = document.createElement("button");
+sticker3Button.textContent = "🐱";
+
 app.appendChild(titleElement);
 app.appendChild(canvas);
 app.appendChild(thinMarkerButton);
 app.appendChild(thickMarkerButton);
+app.appendChild(sticker1Button);
+app.appendChild(sticker2Button);
+app.appendChild(sticker3Button);
 app.appendChild(undoButton);
 app.appendChild(redoButton);
 app.appendChild(clearButton);
@@ -39,10 +50,12 @@ app.appendChild(clearButton);
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
 let currentThickness = 1; // Default to thin marker
+let currentSticker = ""; // Track selected sticker
 
 const lines: MarkerLine[] = [];
 const redoStack: MarkerLine[] = [];
-let toolPreview: ToolPreview | null = null; // Nullable reference for tool preview
+const stickers: Sticker[] = [];
+let stickerPreview: StickerPreview | null = null; // Nullable reference for sticker preview
 
 // MarkerLine class that accepts thickness
 class MarkerLine {
@@ -69,16 +82,16 @@ class MarkerLine {
     }
 }
 
-// ToolPreview class to draw a circle indicating the current tool size
-class ToolPreview {
+// StickerPreview class to preview where a sticker will be placed
+class StickerPreview {
     private x: number;
     private y: number;
-    private thickness: number;
+    private sticker: string;
 
-    constructor(x: number, y: number, thickness: number) {
+    constructor(x: number, y: number, sticker: string) {
         this.x = x;
         this.y = y;
-        this.thickness = thickness;
+        this.sticker = sticker;
     }
 
     updatePosition(x: number, y: number) {
@@ -87,40 +100,75 @@ class ToolPreview {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.thickness / 2, 0, 2 * Math.PI);
-        ctx.strokeStyle = "gray"; // Use gray for the preview
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        ctx.font = "24px Arial";
+        ctx.fillText(this.sticker, this.x, this.y);
     }
+}
+
+// Sticker class for sticker placement and repositioning
+class Sticker {
+    private x: number;
+    private y: number;
+    private sticker: string;
+
+    constructor(x: number, y: number, sticker: string) {
+        this.x = x;
+        this.y = y;
+        this.sticker = sticker;
+    }
+
+    reposition(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    display(ctx: CanvasRenderingContext2D) {
+        ctx.font = "24px Arial";
+        ctx.fillText(this.sticker, this.x, this.y);
+    }
+}
+
+function setupStickerPreview(sticker: string) {
+    currentSticker = sticker;
+    stickerPreview = new StickerPreview(0, 0, sticker);
 }
 
 function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     lines.forEach(line => line.display(ctx));
-    if (!isDrawing && toolPreview) {
-        toolPreview.draw(ctx); // Draw the tool preview if the mouse is not down
+    stickers.forEach(sticker => sticker.display(ctx));
+    if (!isDrawing && stickerPreview) {
+        stickerPreview.draw(ctx);
     }
 }
 
 canvas.addEventListener("mousedown", (event) => {
-    isDrawing = true;
-    redoStack.length = 0;
-    const initialPoint = { x: event.offsetX, y: event.offsetY };
-    const newLine = new MarkerLine(initialPoint, currentThickness);
-    lines.push(newLine);
-    toolPreview = null; // Hide tool preview when drawing starts
-    canvas.dispatchEvent(new Event("drawing-changed"));
+    if (currentSticker) {
+        const newSticker = new Sticker(event.offsetX, event.offsetY, currentSticker);
+        stickers.push(newSticker);
+        currentSticker = ""; // Reset sticker after placement
+        stickerPreview = null;
+        canvas.dispatchEvent(new Event("drawing-changed"));
+    } else {
+        isDrawing = true;
+        redoStack.length = 0;
+        const initialPoint = { x: event.offsetX, y: event.offsetY };
+        const newLine = new MarkerLine(initialPoint, currentThickness);
+        lines.push(newLine);
+        canvas.dispatchEvent(new Event("drawing-changed"));
+    }
 });
 
 canvas.addEventListener("mousemove", (event) => {
     if (!isDrawing) {
-        if (!toolPreview) {
-            toolPreview = new ToolPreview(event.offsetX, event.offsetY, currentThickness);
-        } else {
-            toolPreview.updatePosition(event.offsetX, event.offsetY);
+        if (currentSticker) {
+            if (!stickerPreview) {
+                stickerPreview = new StickerPreview(event.offsetX, event.offsetY, currentSticker);
+            } else {
+                stickerPreview.updatePosition(event.offsetX, event.offsetY);
+            }
+            canvas.dispatchEvent(new Event("tool-moved"));
         }
-        canvas.dispatchEvent(new Event("tool-moved"));
     } else {
         const currentLine = lines[lines.length - 1];
         currentLine.drag(event.offsetX, event.offsetY);
@@ -135,6 +183,7 @@ canvas.addEventListener("mouseup", () => {
 
 clearButton.addEventListener("click", () => {
     lines.length = 0;
+    stickers.length = 0;
     redoStack.length = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
@@ -159,18 +208,6 @@ redoButton.addEventListener("click", () => {
     }
 });
 
-canvas.addEventListener("drawing-changed", () => {
-    redraw();
-});
-
-canvas.addEventListener("tool-moved", () => {
-    redraw();
-});
-
-canvas.addEventListener("mouseleave", () => {
-    isDrawing = false;
-});
-
 // Tool selection logic
 thinMarkerButton.addEventListener("click", () => {
     currentThickness = 1;
@@ -182,6 +219,21 @@ thickMarkerButton.addEventListener("click", () => {
     setActiveTool(thickMarkerButton);
 });
 
+sticker1Button.addEventListener("click", () => {
+    setupStickerPreview("⚽");
+    canvas.dispatchEvent(new Event("tool-moved"));
+});
+
+sticker2Button.addEventListener("click", () => {
+    setupStickerPreview("🚀");
+    canvas.dispatchEvent(new Event("tool-moved"));
+});
+
+sticker3Button.addEventListener("click", () => {
+    setupStickerPreview("🐱");
+    canvas.dispatchEvent(new Event("tool-moved"));
+});
+
 // Function to set active tool and provide visual feedback
 function setActiveTool(selectedButton: HTMLButtonElement) {
     // Remove the "selectedTool" class from all buttons
@@ -191,3 +243,12 @@ function setActiveTool(selectedButton: HTMLButtonElement) {
     // Add the "selectedTool" class to the selected button
     selectedButton.classList.add("selectedTool");
 }
+
+// Redraw when canvas updates
+canvas.addEventListener("drawing-changed", () => {
+    redraw();
+});
+
+canvas.addEventListener("tool-moved", () => {
+    redraw();
+});
