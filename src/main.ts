@@ -30,6 +30,9 @@ thickMarkerButton.textContent = "Thick Marker";
 const createStickerButton = document.createElement("button");
 createStickerButton.textContent = "Create Custom Sticker";
 
+const exportButton = document.createElement("button");
+exportButton.textContent = "Export as PNG";
+
 const initialStickers = ["⚽", "🚀", "🐱"];
 const stickerButtons: HTMLButtonElement[] = [];
 
@@ -46,6 +49,7 @@ app.appendChild(thinMarkerButton);
 app.appendChild(thickMarkerButton);
 stickerButtons.forEach((button) => app.appendChild(button));
 app.appendChild(createStickerButton);
+app.appendChild(exportButton);
 app.appendChild(undoButton);
 app.appendChild(redoButton);
 app.appendChild(clearButton);
@@ -252,4 +256,22 @@ canvas.addEventListener("drawing-changed", () => {
 
 canvas.addEventListener("tool-moved", () => {
   redraw();
+});
+
+exportButton.addEventListener("click", () => {
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = 1024;
+  exportCanvas.height = 1024;
+  const exportCtx = exportCanvas.getContext("2d")!;
+
+  exportCtx.scale(4, 4); // Scale the canvas 4x in each dimension to fit the new size
+
+  lines.forEach((line) => line.display(exportCtx));
+  stickers.forEach((sticker) => sticker.display(exportCtx));
+
+  const dataUrl = exportCanvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = "canvas_export.png";
+  link.click();
 });
