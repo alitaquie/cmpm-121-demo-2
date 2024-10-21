@@ -1,4 +1,4 @@
-:root {
+:root { 
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -25,41 +25,25 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  justify-content: center;
+  align-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--background-color);
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: #f9f9f9;
+  margin-bottom: 1rem;
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #3178c6aa);
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
 
 button {
@@ -70,15 +54,55 @@ button {
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
+  color: #f9f9f9;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background-color 0.25s;
+  margin: 0.5rem;
 }
 button:hover {
   border-color: #646cff;
+  background-color: #3a3a3a;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+button.selectedTool {
+  background-color: #ffe066; /* Brighter highlight for selected tool */
+  color: #213547; /* Darker text color for better contrast */
+}
+
+#appCanvas {
+  border: 2px solid #213547;
+  border-radius: 8px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+  margin-top: 1rem;
+  background-color: #fff; /* Canvas should contrast with background */
+}
+
+.card {
+  padding: 1.5em;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+button#clearButton,
+button#undoButton,
+button#redoButton,
+button#exportButton {
+  width: 100px; /* Fixed width for layout consistency */
+}
+
+button.stampButton {
+  font-size: 1.5rem; /* Larger emoji buttons for visual emphasis */
+  padding: 0.4em 0.8em;
+}
+
+.read-the-docs {
+  color: #888;
+  margin-top: 2rem;
 }
 
 @media (prefers-color-scheme: light) {
@@ -91,16 +115,16 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+    color: #213547;
   }
-}
-
-#appCanvas {
-  border: 2px solid black;
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Drop shadow */
-  margin-top: 1rem;
-}
-
-button.selectedTool {
-  background-color: yellow; 
+  button:hover {
+    border-color: #646cff;
+    background-color: #e0e0e0;
+  }
+  button.selectedTool {
+    background-color: #ffdd57;
+  }
+  #appCanvas {
+    border: 2px solid #b0b0b0;
+  }
 }
