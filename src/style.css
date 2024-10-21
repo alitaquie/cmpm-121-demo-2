@@ -1,13 +1,21 @@
-:root { 
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+:root {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --primary-color: #646cff;
+  --secondary-color: #535bf2;
+  --background-dark: #242424;
+  --background-light: #f9f9f9;
+  --text-light: rgba(255, 255, 255, 0.9);
+  --text-dark: #213547;
+  --accent-color: #ffe066;
+  --highlight-color: #ffdd57;
 
-  font-synthesis: none;
+  color-scheme: light dark;
+  color: var(--text-light);
+  background-color: var(--background-dark);
+
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -15,11 +23,13 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
+
 a:hover {
-  color: #535bf2;
+  color: var(--secondary-color);
 }
 
 body {
@@ -29,48 +39,61 @@ body {
   align-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--background-color);
+  background-color: var(--background-dark);
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-  color: #f9f9f9;
+  font-size: 3em;
+  line-height: 1.2;
   margin-bottom: 1rem;
+  color: var(--text-light);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 #app {
-  max-width: 1024px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+#app:hover {
+  transform: translateY(-10px); /* Subtle hover effect */
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 0.75em 1.5em;
+  font-size: 1.2em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
-  color: #f9f9f9;
+  background-color: var(--background-light);
+  color: var(--text-dark);
   cursor: pointer;
-  transition: border-color 0.25s, background-color 0.25s;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
   margin: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
 button:hover {
-  border-color: #646cff;
-  background-color: #3a3a3a;
+  background-color: var(--highlight-color);
+  border-color: var(--primary-color);
+  transform: translateY(-5px); /* Lift effect on hover */
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+button:active {
+  transform: translateY(2px); /* Slight push effect */
 }
 
 button.selectedTool {
-  background-color: #ffe066; /* Brighter highlight for selected tool */
-  color: #213547; /* Darker text color for better contrast */
+  background-color: var(--accent-color);
+  color: var(--text-dark);
+  border-color: var(--primary-color);
 }
 
 #appCanvas {
@@ -80,51 +103,77 @@ button.selectedTool {
   margin-top: 1rem;
   background-color: #fff; /* Canvas should contrast with background */
 }
-
 .card {
-  padding: 1.5em;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.25);
+  padding: 2em;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  color: var(--text-light);
+}
+
+.read-the-docs {
+  color: #888;
+  margin-top: 2rem;
+  font-size: 0.9em;
 }
 
 button#clearButton,
 button#undoButton,
 button#redoButton,
 button#exportButton {
-  width: 100px; /* Fixed width for layout consistency */
+  width: 120px;
 }
 
 button.stampButton {
-  font-size: 1.5rem; /* Larger emoji buttons for visual emphasis */
-  padding: 0.4em 0.8em;
+  font-size: 1.6rem;
+  padding: 0.5em 1em;
+  background-color: var(--primary-color);
+  color: white;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.read-the-docs {
-  color: #888;
-  margin-top: 2rem;
+button.stampButton:hover {
+  background-color: var(--secondary-color);
+  transform: scale(1.1); /* Slight scale on hover */
+}
+
+button.stampButton:active {
+  transform: scale(0.95); /* Click feedback */
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--text-dark);
+    background-color: var(--background-light);
   }
-  a:hover {
-    color: #747bff;
+
+  body {
+    background-color: var(--background-light);
   }
+
+  #app {
+    background-color: white;
+  }
+
+  h1 {
+    color: var(--text-dark);
+  }
+
   button {
-    background-color: #f9f9f9;
-    color: #213547;
+    background-color: var(--background-light);
+    color: var(--text-dark);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
+
   button:hover {
-    border-color: #646cff;
-    background-color: #e0e0e0;
+    background-color: var(--accent-color);
   }
+
   button.selectedTool {
-    background-color: #ffdd57;
+    background-color: var(--highlight-color);
   }
+
   #appCanvas {
-    border: 2px solid #b0b0b0;
+    border: 2px solid var(--primary-color);
   }
 }
