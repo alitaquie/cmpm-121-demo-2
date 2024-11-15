@@ -95,10 +95,11 @@ class PenLine {
 }
 
 class StampPreview {
-  private x: number;
-  private y: number;
-  private stamp: string;
-  private rotation: number;
+  // Private properties - only accessible within the class
+  private x: number;          // X coordinate of the preview
+  private y: number;          // Y coordinate of the preview
+  private stamp: string;      // The emoji/character to be displayed
+  private rotation: number;   // Current rotation in degrees
 
   constructor(x: number, y: number, stamp: string, rotation: number) {
     this.x = x;
@@ -107,12 +108,14 @@ class StampPreview {
     this.rotation = rotation;
   }
 
-  updatePosition(x: number, y: number) {
+  // Public method - explicitly marked as accessible from outside
+  public updatePosition(x: number, y: number) {
     this.x = x;
     this.y = y;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  // Public method - handles rendering of the preview
+  public draw(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate((this.rotation * Math.PI) / 180);  // Rotation preview
@@ -122,11 +125,16 @@ class StampPreview {
   }
 }
 
+/**
+ * Stamp class represents a placed stamp on the canvas
+ * Updated with consistent access modifier pattern for better maintainability
+ */
 class Stamp {
-  private x: number;
-  private y: number;
-  private stamp: string;
-  private rotation: number;
+  // Private properties - internal state of the stamp
+  private x: number;          // X coordinate of the placed stamp
+  private y: number;          // Y coordinate of the placed stamp
+  private stamp: string;      // The emoji/character being displayed
+  private rotation: number;   // Fixed rotation angle in degrees
 
   constructor(x: number, y: number, stamp: string, rotation: number) {
     this.x = x;
@@ -135,7 +143,8 @@ class Stamp {
     this.rotation = rotation;
   }
 
-  display(ctx: CanvasRenderingContext2D) {
+  // Public method - provides the rendering interface
+  public display(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate((this.rotation * Math.PI) / 180);
@@ -144,6 +153,7 @@ class Stamp {
     ctx.restore();
   }
 }
+
 
 function setupStampPreview(stamp: string, rotation: number) {
   currentStamp = stamp;
