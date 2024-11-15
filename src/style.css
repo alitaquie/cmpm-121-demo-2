@@ -88,6 +88,7 @@ button:hover {
 
 button:active {
   transform: translateY(2px); /* Slight push effect */
+  
 }
 
 button.selectedTool {
@@ -96,13 +97,32 @@ button.selectedTool {
   border-color: var(--primary-color);
 }
 
+/* Bright Gradient Border Animation for Canvas */
 #appCanvas {
-  border: 2px solid #213547;
-  border-radius: 8px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
-  margin-top: 1rem;
-  background-color: #fff; /* Canvas should contrast with background */
+  position: relative;
+  border: 4px solid transparent; /* Increased thickness for visibility */
+  background-image: linear-gradient(#fff, #fff),
+    linear-gradient(120deg, #ff4e50, #f9d423, #69d2e7);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  animation: gradient-border-animation 3s linear infinite;
 }
+
+@keyframes gradient-border-animation {
+  0% {
+    background-image: linear-gradient(#fff, #fff),
+      linear-gradient(120deg, #ff4e50, #f9d423, #69d2e7);
+  }
+  50% {
+    background-image: linear-gradient(#fff, #fff),
+      linear-gradient(120deg, #69d2e7, #ff4e50, #f9d423);
+  }
+  100% {
+    background-image: linear-gradient(#fff, #fff),
+      linear-gradient(120deg, #f9d423, #69d2e7, #ff4e50);
+  }
+}
+
 .card {
   padding: 2em;
   background-color: #2a2a2a;
@@ -176,4 +196,8 @@ button.stampButton:active {
   #appCanvas {
     border: 2px solid var(--primary-color);
   }
+
+  
+
+  
 }
