@@ -37,6 +37,11 @@ exportButton.textContent = "Export as PNG";
 const initialStamps = ["🌸", "✨", "🎉", "🔥", "🍕"];
 const stampButtons: HTMLButtonElement[] = [];
 
+const stampHistory: Stamp[] = []; // Array to track placed stamps
+const redoStampStack: Stamp[] = []; // Stack for redo actions related to stamps
+
+const displayList: Array<PenLine | Stamp> = []
+
 initialStamps.forEach((stamp) => {
   const stampButton = document.createElement("button");
   stampButton.textContent = stamp;
@@ -174,6 +179,7 @@ canvas.addEventListener("mousedown", (event) => {
   if (currentStamp) {
     const newStamp = new Stamp(event.offsetX, event.offsetY, currentStamp, currentRotation);
     stamps.push(newStamp);
+    stampHistory.push(newStamp); // Save the stamp to history
     currentStamp = "";
     stampPreview = null;
     canvas.dispatchEvent(new Event("drawing-changed"));
@@ -217,22 +223,22 @@ clearButton.addEventListener("click", () => {
 });
 
 undoButton.addEventListener("click", () => {
-  if (lines.length > 0) {
-    const lastLine = lines.pop();
-    if (lastLine) {
-      redoStack.push(lastLine);
+  if (displayList.length > 0) { // Check if there are any drawable objects
+    const lastElement = displayList.pop(); // Pop the most recent element
+    if (lastElement) {
+      redoStack.push(lastElement); // Add it to the redo stack
     }
-    canvas.dispatchEvent(new Event("drawing-changed"));
+    canvas.dispatchEvent(new Event("drawing-changed")); // Update the display
   }
 });
 
 redoButton.addEventListener("click", () => {
-  if (redoStack.length > 0) {
-    const lastRedo = redoStack.pop();
-    if (lastRedo) {
-      lines.push(lastRedo);
+  if (redoStack.length > 0) { // Check if there are elements in the redo stack
+    const lastRedoElement = redoStack.pop(); // Pop the most recent element from the redo stack
+    if (lastRedoElement) {
+      displayList.push(lastRedoElement); // Add it back to the displayList
     }
-    canvas.dispatchEvent(new Event("drawing-changed"));
+    canvas.dispatchEvent(new Event("drawing-changed")); // Update the display
   }
 });
 
@@ -312,3 +318,7 @@ function getRandomRotation() {
 
 canvas.addEventListener("drawing-changed", redraw);
 canvas.addEventListener("tool-moved", redraw);
+
+interface Drawable {
+  display(ctx: CanvasRenderingContext2D): void;
+}
